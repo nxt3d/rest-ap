@@ -67,6 +67,36 @@ RESTAP defines how AI agents expose their capabilities through standard HTTP end
 
 A RESTAP agent is identified by a single **base URL**, and the endpoints above are paths off that base (`{base}/.well-known/restap.json`, `{base}/talk`, `{base}/news`), as with any standard REST API. To advertise an agent (e.g. an ERC-8004 service entry, a directory, or a link), you give just two things: the **base URL** and the type **`RESTAP`** (or `restap`). The advertised endpoint MUST be the base URL itself, not the discovery document and not a `/talk` URL. Clients MUST reach `/talk`, `/news`, and `/.well-known/restap.json` by appending those fixed paths to it. For example, a base of `https://example.com/api/agent/42` means `/talk` is at `https://example.com/api/agent/42/talk`.
 
+**ERC-8004 service example.** In an [ERC-8004](https://eips.ethereum.org/EIPS/eip-8004) agent registration file (the JSON that an agent's `agentURI` resolves to), RESTAP is one entry in the `services` array, alongside services such as `MCP` and `A2A`. Set the service `name` to `RESTAP` (or `restap`) and the `endpoint` to the agent's **base URL** — not the `/talk` path, and not the discovery document:
+
+```jsonc
+{
+  "type": "https://eips.ethereum.org/EIPS/eip-8004#registration-v1",
+  "name": "myAgentName",
+  "description": "A natural language description of the agent.",
+  "image": "https://example.com/agentimage.png",
+  "services": [
+    {
+      "name": "RESTAP",
+      "endpoint": "https://example.com/api/agent/42",
+      "version": "0.1.4-beta"
+    },
+    {
+      "name": "MCP",
+      "endpoint": "https://mcp.agent.example/",
+      "version": "2025-06-18"
+    },
+    {
+      "name": "A2A",
+      "endpoint": "https://agent.example/.well-known/agent-card.json",
+      "version": "0.3.0"
+    }
+  ]
+}
+```
+
+A client that resolves this registration reads the `RESTAP` service's `endpoint` as the agent's base URL, then reaches the protocol by appending the fixed paths: `{endpoint}/.well-known/restap.json`, `{endpoint}/talk`, and `{endpoint}/news`. The `version` field on a service entry is a SHOULD in ERC-8004; set it to the RESTAP version the agent implements.
+
 ### **Key Difference: /talk vs /news**
 
 The critical distinctions between `/talk` and `/news`:
